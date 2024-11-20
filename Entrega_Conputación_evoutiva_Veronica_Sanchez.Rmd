@@ -1,0 +1,100 @@
+---
+title: "Práctica Computación Evolutiva"
+author: "Verónica Sánchez"
+output: html_notebook
+---
+El objetivo de esta práctica es seleccionar capitales europeas y utilizar computación evolutiva para encontrar el recorrido con menor distancia entre capitales si queremos pasar una vez por cada ciudad y volver a la de salida. Salimos siempre de París y usaremos un parámetro para que seleccione un número concreto de países.
+
+
+Primero cargamos el dataframe:
+```{r}
+data <- read.csv("europe_capital_cities.csv", stringsAsFactors = TRUE)
+```
+
+Cargamos la librería 'GA' para implementar un algoritmo genético que busca la mejor ruta entre las capitales europeas.
+
+```{r}
+library(GA)
+```
+
+```{r}
+# Verificar si el DataFrame está vacío o es NULL
+if (is.null(data) || nrow(data) == 0) {
+  stop("El DataFrame está vacío o es NULL. Asegúrate de que el archivo CSV contiene datos.")
+}
+```
+
+
+```{r}
+# Función de distancia entre dos ciudades
+distancia <- function(x) {
+  distancia_total <- 0
+  for (i in 1:(length(x) - 1)) {
+    ciudad_actual <- data[data$hckey == x[i], c("capital_lat", "capital_lng")]
+    ciudad_siguiente <- data[data$hckey == x[i + 1], c("capital_lat", "capital_lng")]
+    distancia_total <- distancia_total + sqrt(sum((ciudad_actual - ciudad_siguiente)^2))
+  }
+  return(distancia_total)
+}
+```
+
+```{r}
+# Función de aptitud para el algoritmo genético (considerando las primeras 5 ciudades)
+aptitud <- function(x) {
+  1 / distancia(x[1:5])
+}
+```
+
+```{r}
+# Configurar y ejecutar el algoritmo genético (considerando las primeras 5 ciudades)
+set.seed(123)
+resultado <- ga(type = "permutation",
+                fitness = aptitud,
+                lower = rep(1, 5),
+                upper = rep(5, 5),
+                popSize = 50,
+                maxiter = 100,
+                run = 100)
+```
+
+
+```{r}
+# Mostrar el resultado
+mejor_ruta <- data$capital[resultado@solution]
+mejor_distancia <- 1 / resultado@fitness
+cat("Mejor ruta:", paste(mejor_ruta, collapse = " -> "), "\n")
+cat("Mejor distancia:", mejor_distancia, "\n")
+```
+
+```{r}
+install.packages("sf")
+
+```
+
+```{r}
+# Carga los paquetes
+library(sf)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+# Crea un objeto sf con los datos geográficos
+sf_data <- st_as_sf(data, coords = c("capital_lng", "capital_lat"), crs = 4326)
+```
+
+```{r}
+# Visualiza el mapa
+ggplot() +
+  geom_sf(data = sf_data) +
+  geom_path(data = sf_data[resultado@solution, , drop = FALSE], 
+            aes(x = st_coordinates(sf_data[resultado@solution,])[,"X"], 
+                y = st_coordinates(sf_data[resultado@solution,])[,"Y"],
+                color = "Optimal Path"), 
+            linewidth = 2) +
+  coord_sf() +
+  labs(title = "Optimal Route Map") +
+  theme_minimal()
+
+```
+
