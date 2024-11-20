@@ -1,3 +1,4 @@
 ## Práctica Computación Evolutiva
 
-El objetivo de esta práctica es seleccionar capitales europeas y utilizar computación evolutiva para encontrar el recorrido con menor distancia entre capitales si queremos pasar una vez por cada ciudad y volver a la de salida. Salimos siempre de París y usaremos un parámetro para que seleccione un número concreto de países.
+El objetivo de esta práctica es seleccionar capitales europeas y utilizar computación evolutiva para encontrar el recorrido con menor distancia entre capitales si queremos pasar una vez por cada ciudad y volver a la de salida. 
+Salimos siempre de París y usaremos un parámetro para que seleccione un número concreto de países.
