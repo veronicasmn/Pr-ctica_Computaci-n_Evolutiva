@@ -1,1 +1,0 @@
-# Pr-ctica_Computaci-n_Evolutiva
